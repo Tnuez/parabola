@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>График квадратичной функции</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .formula {
+            text-align: center;
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 30px;
+            font-family: 'Courier New', monospace;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .formula .param {
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        canvas {
+            display: block;
+            margin: 0 auto 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .slider-group {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .slider-group:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .param-name {
+            font-size: 18px;
+        }
+        
+        .param-value {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 16px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #764ba2;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            background: #764ba2;
+        }
+        
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .info-item {
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .info-item strong {
+            color: #333;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .formula {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>График квадратичной функции</h1>
+        <div class="formula">
+            y = <span id="formula-a">1</span>x² + <span id="formula-b">0</span>x + <span id="formula-c">0</span>
+        </div>
+        
+        <canvas id="graph" width="600" height="400"></canvas>
+        
+        <div class="controls">
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span class="param-name">Параметр a</span>
+                    <span class="param-value" id="value-a">1.0</span>
+                </div>
+                <input type="range" id="slider-a" min="-5" max="5" step="0.1" value="1">
+            </div>
+            
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span class="param-name">Параметр b</span>
+                    <span class="param-value" id="value-b">0.0</span>
+                </div>
+                <input type="range" id="slider-b" min="-10" max="10" step="0.1" value="0">
+            </div>
+            
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span class="param-name">Параметр c</span>
+                    <span class="param-value" id="value-c">0.0</span>
+                </div>
+                <input type="range" id="slider-c" min="-10" max="10" step="0.1" value="0">
+            </div>
+        </div>
+        
+        <div class="info">
+            <h3>Свойства параболы:</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Вершина:</strong> <span id="vertex">(-0.00, 0.00)</span>
+                </div>
+                <div class="info-item">
+                    <strong>Ось симметрии:</strong> x = <span id="axis">0.00</span>
+                </div>
+                <div class="info-item">
+                    <strong>Направление:</strong> <span id="direction">вверх</span>
+                </div>
+                <div class="info-item">
+                    <strong>Y-пересечение:</strong> (0, <span id="y-intercept">0.00</span>)
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('graph');
+        const ctx = canvas.getContext('2d');
+        
+        // Адаптивный размер canvas
+        function resizeCanvas() {
+            const containerWidth = canvas.parentElement.clientWidth;
+            canvas.width = Math.min(600, containerWidth - 40);
+            canvas.height = canvas.width * 2/3;
+            drawGraph();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Параметры
+        let a = 1, b = 0, c = 0;
+        
+        // Элементы управления
+        const sliderA = document.getElementById('slider-a');
+        const sliderB = document.getElementById('slider-b');
+        const sliderC = document.getElementById('slider-c');
+        const valueA = document.getElementById('value-a');
+        const valueB = document.getElementById('value-b');
+        const valueC = document.getElementById('value-c');
+        const formulaA = document.getElementById('formula-a');
+        const formulaB = document.getElementById('formula-b');
+        const formulaC = document.getElementById('formula-c');
+        
+        // Обработчики событий
+        sliderA.addEventListener('input', (e) => {
+            a = parseFloat(e.target.value);
+            valueA.textContent = a.toFixed(1);
+            updateFormula();
+            drawGraph();
+            updateInfo();
+        });
+        
+        sliderB.addEventListener('input', (e) => {
+            b = parseFloat(e.target.value);
+            valueB.textContent = b.toFixed(1);
+            updateFormula();
+            drawGraph();
+            updateInfo();
+        });
+        
+        sliderC.addEventListener('input', (e) => {
+            c = parseFloat(e.target.value);
+            valueC.textContent = c.toFixed(1);
+            updateFormula();
+            drawGraph();
+            updateInfo();
+        });
+        
+        function updateFormula() {
+            const formula = document.querySelector('.formula');
+            let text = 'y = ';
+            
+            // Коэффициент a
+            if (a === 0) {
+                text += '0x²';
+            } else if (a === 1) {
+                text += 'x²';
+            } else if (a === -1) {
+                text += '-x²';
+            } else {
+                text += a.toFixed(1) + 'x²';
+            }
+            
+            // Коэффициент b
+            if (b === 0) {
+                text += ' + 0x';
+            } else if (b === 1) {
+                text += ' + x';
+            } else if (b === -1) {
+                text += ' - x';
+            } else if (b > 0) {
+                text += ' + ' + b.toFixed(1) + 'x';
+            } else {
+                text += ' - ' + Math.abs(b).toFixed(1) + 'x';
+            }
+            
+            // Коэффициент c
+            if (c === 0) {
+                text += ' + 0';
+            } else if (c > 0) {
+                text += ' + ' + c.toFixed(1);
+            } else {
+                text += ' - ' + Math.abs(c).toFixed(1);
+            }
+            
+            formula.innerHTML = text;
+        }
+        
+        function f(x) {
+            return a * x * x + b * x + c;
+        }
+        
+        function drawGraph() {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Очистка
+            ctx.clearRect(0, 0, width, height);
+            
+            // Масштаб
+            const scale = 20;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // Сетка
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < width; i += scale) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < height; i += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(width, i);
+                ctx.stroke();
+            }
+            
+            // Оси
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            
+            // Ось X
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            // Ось Y
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+            
+            // Метки на осях
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            
+            for (let i = -Math.floor(centerX/scale); i <= Math.floor(centerX/scale); i++) {
+                if (i !== 0) {
+                    const x = centerX + i * scale;
+                    ctx.fillText(i.toString(), x, centerY + 5);
+                }
+            }
+            
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            for (let i = -Math.floor(centerY/scale); i <= Math.floor(centerY/scale); i++) {
+                if (i !== 0) {
+                    const y = centerY - i * scale;
+                    ctx.fillText(i.toString(), centerX + 5, y);
+                }
+            }
+            
+            // График функции
+            if (a !== 0) {
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                
+                for (let px = 0; px < width; px++) {
+                    const x = (px - centerX) / scale;
+                    const y = f(x);
+                    const py = centerY - y * scale;
+                    
+                    if (px === 0) {
+                        ctx.moveTo(px, py);
+                    } else {
+                        ctx.lineTo(px, py);
+                    }
+                }
+                
+                ctx.stroke();
+                
+                // Вершина параболы
+                if (a !== 0) {
+                    const vertexX = -b / (2 * a);
+                    const vertexY = f(vertexX);
+                    const vx = centerX + vertexX * scale;
+                    const vy = centerY - vertexY * scale;
+                    
+                    ctx.fillStyle = '#764ba2';
+                    ctx.beginPath();
+                    ctx.arc(vx, vy, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (b !== 0) {
+                // Линейная функция
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                
+                const x1 = -centerX / scale;
+                const y1 = b * x1 + c;
+                const x2 = centerX / scale;
+                const y2 = b * x2 + c;
+                
+                ctx.moveTo(0, centerY - y1 * scale);
+                ctx.lineTo(width, centerY - y2 * scale);
+                ctx.stroke();
+            } else {
+                // Константная функция
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, centerY - c * scale);
+                ctx.lineTo(width, centerY - c * scale);
+                ctx.stroke();
+            }
+        }
+        
+        function updateInfo() {
+            const vertexEl = document.getElementById('vertex');
+            const axisEl = document.getElementById('axis');
+            const directionEl = document.getElementById('direction');
+            const yInterceptEl = document.getElementById('y-intercept');
+            
+            if (a !== 0) {
+                const vertexX = -b / (2 * a);
+                const vertexY = f(vertexX);
+                vertexEl.textContent = `(${vertexX.toFixed(2)}, ${vertexY.toFixed(2)})`;
+                axisEl.textContent = vertexX.toFixed(2);
+                directionEl.textContent = a > 0 ? 'вверх ↑' : 'вниз ↓';
+            } else {
+                vertexEl.textContent = 'нет (не парабола)';
+                axisEl.textContent = 'нет';
+                directionEl.textContent = b !== 0 ? 'линия' : 'константа';
+            }
+            
+            yInterceptEl.textContent = c.toFixed(2);
+        }
+        
+        // Инициализация
+        resizeCanvas();
+        updateInfo();
+    </script>
+</body>
+</html>
